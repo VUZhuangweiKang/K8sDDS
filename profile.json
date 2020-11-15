@@ -1,0 +1,22 @@
+{
+    "meta": {
+        "session": "sname",
+        "numPublishers": 1,
+        "numSubscribers": 1,
+        "network": "hostnetwork"
+    },
+    "perftest_cpp": {
+        "--multicast": false,
+        "--dataLen": 64,
+        "--transport": "UDPv4",
+        "--bestEffort": false,
+        "--noPrint": true,
+        "--batchSize": -1,
+        "--executionTime": 60,
+        "--cpu": true,
+        "--latencyTest": false,
+        "--sendQueueSize": 20,
+        "--pubRate": -1,
+        "--nic": "eth0"
+    }
+}

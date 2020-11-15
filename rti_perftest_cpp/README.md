@@ -1,0 +1,1 @@
+To convenient users, we automatically copy this directory to Worker node while running the DDSK8S application in baremetal mode.
