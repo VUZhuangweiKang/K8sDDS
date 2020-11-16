@@ -7,5 +7,5 @@ RTI_LICENSE_FILE = "rti_license.dat"
 PERFTEST_CDS = "rti-clouddiscoveryservice"
 CDS_PORT = 7400
 
-PERFTEST_IMAGE = "zhuangweikang/rtiperftest:latest"
-RTI_CDS_IMAGE = "zhuangweikang/rticds:latest"
+PERFTEST_IMAGE = "zhuangweikang/rtiperftest-rp:latest"
+RTI_CDS_IMAGE = "kyoungho/rti-clouddiscoveryservice:latest"

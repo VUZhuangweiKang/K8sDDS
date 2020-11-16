@@ -5,7 +5,7 @@ from contants import *
 from kubernetes import client, config
 
 # Kubernetes API
-config.load_kube_config(config_file='./kube/config')
+config.load_kube_config(config_file='~/.kube/config')
 apps_v1_api = client.AppsV1Api()
 core_v1_api = client.CoreV1Api()
 

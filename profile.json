@@ -1,6 +1,6 @@
 {
     "meta": {
-        "session": "sname",
+        "session": "sessionID",
         "numPublishers": 1,
         "numSubscribers": 1,
         "network": "hostnetwork"
@@ -11,12 +11,12 @@
         "--transport": "UDPv4",
         "--bestEffort": false,
         "--noPrint": true,
-        "--batchSize": -1,
+        "--batchSize": 0,
         "--executionTime": 60,
         "--cpu": true,
         "--latencyTest": false,
         "--sendQueueSize": 20,
-        "--pubRate": -1,
+        "--pubRate": 0,
         "--nic": "eth0"
     }
 }

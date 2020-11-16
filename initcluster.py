@@ -5,7 +5,7 @@ from contants import *
 from kubernetes import client, config
 
 # Kubernetes API
-config.load_kube_config(config_file='./kube/config')
+config.load_kube_config(config_file='~/.kube/config')
 apps_v1_api = client.AppsV1Api()
 core_v1_api = client.CoreV1Api()
 
@@ -59,10 +59,10 @@ class InitCluster(object):
         print("Pod %s is created." % name)
 
     def main(self):
-        nodes = list_nodes_name()[1:]  # skip the manager node
-        assert len(nodes) >= 2
-
         meta_args = self.profile['meta']
+        nodes = list_nodes_name()[1:]  # skip the manager node
+        assert len(nodes) >= meta_args['numPublishers'] + meta_args['numSubscribers']
+
         # label pub nodes
         for i in range(min(len(nodes), meta_args['numPublishers'])):
             core_v1_api.patch_node(name=nodes[i], body={
@@ -74,7 +74,9 @@ class InitCluster(object):
         cds_address = "rtps@%s:7400" % PERFTEST_CDS
         for i in range(meta_args['numPublishers']):
             containers = [client.V1Container(name=PERFTEST_PUB + str(i), image=PERFTEST_IMAGE,
-                                             env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)])]
+                                             tty=True,
+                                             env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)],
+                                             command=['bash'])]
             self.create_pod(dict(perftest_pub="pub%d" % i), containers, i)
 
         if len(nodes) < meta_args['numSubscribers'] + meta_args['numPublishers']:
@@ -83,9 +85,8 @@ class InitCluster(object):
                   (len(nodes), meta_args['numSubscribers'], meta_args['numPublishers']))
 
         # label sub nodes
-        for i in range(min(len(nodes), meta_args['numPublishers'] + meta_args['numSubscribers']),
-                       meta_args['numPublishers'], -1):
-            core_v1_api.patch_node(name=nodes[i-1], body={
+        for i in range(meta_args['numSubscribers']):
+            core_v1_api.patch_node(name=nodes[i + meta_args['numPublishers']], body={
                 "metadata": {
                     "labels": {"perftest_sub": "sub%d" % i}
                 }
@@ -93,7 +94,9 @@ class InitCluster(object):
         # create sub pods
         for i in range(meta_args['numSubscribers']):
             containers = [client.V1Container(name=PERFTEST_SUB + str(i), image=PERFTEST_IMAGE,
-                                             env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)])]
+                                             tty=True,
+                                             env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)],
+                                             command=['bash'])]
             self.create_pod(dict(perftest_sub="sub%d" % i), containers, i)
 
 
