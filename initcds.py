@@ -81,7 +81,7 @@ def init_cds_deploy():
             labels={"run": PERFTEST_CDS}),
         spec=client.V1PodSpec(
             containers=[cds],
-            node_selector=dict(discovery="cds"),
+            node_selector=dict(perftest="cds"),
             volumes=[client.V1Volume(name="license-volume",
                                      config_map=client.V1ConfigMapVolumeSource(name=RTI_LICENSE))]))
 
@@ -109,7 +109,7 @@ def create_cds():
     # label CDS node
     core_v1_api.patch_node(name=nodes[0], body={
         "metadata": {
-            "labels": {"discovery": "cds"}
+            "labels": {"perftest": "cds"}
         }})
 
     # create CDS deployment & config map for cds if not existing

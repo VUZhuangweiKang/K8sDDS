@@ -17,13 +17,19 @@ def init_container(name, image):
     )
     return container
 
-
 def list_nodes_name():
-    nodes = []
+    master = []
+    workers = []
     for node in core_v1_api.list_node().items:
-        nodes.append(node.metadata.name)
-    return nodes
-
+        flag = False
+        for label in node.metadata.labels:
+            if 'master' in label:
+                master.append(node.metadata.name)
+                flag = True
+                break
+        if not flag:
+            workers.append(node.metadata.name)
+    return master, workers
 
 class InitCluster(object):
     def __init__(self, profile_path):
@@ -60,14 +66,14 @@ class InitCluster(object):
 
     def main(self):
         meta_args = self.profile['meta']
-        nodes = list_nodes_name()[1:]  # skip the manager node
-        assert len(nodes) >= meta_args['numPublishers'] + meta_args['numSubscribers']
+        master, workers = list_nodes_name()
+        assert len(workers) >= meta_args['numPublishers'] + meta_args['numSubscribers']
 
         # label pub nodes
-        for i in range(min(len(nodes), meta_args['numPublishers'])):
-            core_v1_api.patch_node(name=nodes[i], body={
+        for i in range(min(len(workers), meta_args['numPublishers'])):
+            core_v1_api.patch_node(name=workers[i], body={
                 "metadata": {
-                    "labels": {"perftest_pub": "pub%d" % i}
+                    "labels": {"perftest": "pub%d" % i}
                 }
             })
         # create pub pods
@@ -77,18 +83,18 @@ class InitCluster(object):
                                              tty=True,
                                              env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)],
                                              command=['bash'])]
-            self.create_pod(dict(perftest_pub="pub%d" % i), containers, i)
+            self.create_pod(dict(perftest="pub%d" % i), containers, i)
 
-        if len(nodes) < meta_args['numSubscribers'] + meta_args['numPublishers']:
+        if len(workers) < meta_args['numSubscribers'] + meta_args['numPublishers']:
             print("There are %d nodes in your cluster, but %d pub and %d sub is going to be run, so some "
                   "pub and sub may run in the same node." %
-                  (len(nodes), meta_args['numSubscribers'], meta_args['numPublishers']))
+                  (len(workers), meta_args['numSubscribers'], meta_args['numPublishers']))
 
         # label sub nodes
         for i in range(meta_args['numSubscribers']):
-            core_v1_api.patch_node(name=nodes[i + meta_args['numPublishers']], body={
+            core_v1_api.patch_node(name=workers[i + meta_args['numPublishers']], body={
                 "metadata": {
-                    "labels": {"perftest_sub": "sub%d" % i}
+                    "labels": {"perftest": "sub%d" % i}
                 }
             })
         # create sub pods
@@ -97,7 +103,7 @@ class InitCluster(object):
                                              tty=True,
                                              env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)],
                                              command=['bash'])]
-            self.create_pod(dict(perftest_sub="sub%d" % i), containers, i)
+            self.create_pod(dict(perftest="sub%d" % i), containers, i)
 
 
 if __name__ == "__main__":

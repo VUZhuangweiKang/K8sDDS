@@ -3,7 +3,7 @@
         "session": "sessionID",
         "numPublishers": 1,
         "numSubscribers": 1,
-        "network": "hostnetwork"
+        "network": "flannel"
     },
     "perftest_cpp": {
         "--multicast": false,
