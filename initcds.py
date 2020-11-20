@@ -17,19 +17,10 @@ def list_deploys():
     return deploys
 
 
-def list_nodes_name():
-    nodes = []
-    for node in core_v1_api.list_node().items:
-        nodes.append(node.metadata.name)
-    return nodes
-
-
 def create_deployment(deployment):
     if deployment.metadata.name not in list_deploys():
         # Create deployment if not existing
-        apps_v1_api.create_namespaced_deployment(
-            body=deployment,
-            namespace="default")
+        apps_v1_api.create_namespaced_deployment(body=deployment, namespace="default")
         print("Deployment %s created." % deployment.metadata.name)
     else:
         # otherwise patch the deployment
@@ -49,18 +40,10 @@ def create_cds_service():
         body = client.V1Service(
             api_version="v1",
             kind="Service",
-            metadata=client.V1ObjectMeta(
-                name=PERFTEST_CDS,
-                labels={"run": PERFTEST_CDS}
-            ),
+            metadata=client.V1ObjectMeta(name=PERFTEST_CDS, labels={"run": PERFTEST_CDS}),
             spec=client.V1ServiceSpec(
                 selector={"run": PERFTEST_CDS},
-                ports=[client.V1ServicePort(
-                    port=CDS_PORT,
-                    protocol="UDP"
-                )]
-            )
-        )
+                ports=[client.V1ServicePort(port=CDS_PORT, protocol="UDP")]))
         core_v1_api.create_namespaced_service(namespace="default", body=body)
 
 
@@ -70,27 +53,22 @@ def init_cds_deploy():
         image=RTI_CDS_IMAGE,
         image_pull_policy="Always",
         volume_mounts=[client.V1VolumeMount(name="license-volume", mount_path="/app/license")],
-        ports=[client.V1ContainerPort(
-            container_port=CDS_PORT, protocol="UDP")],
+        ports=[client.V1ContainerPort(container_port=CDS_PORT, protocol="UDP")],
         env=[client.V1EnvVar(name="ARGS", value="-verbosity 6")],
     )
 
     # Template
     template = client.V1PodTemplateSpec(
-        metadata=client.V1ObjectMeta(
-            labels={"run": PERFTEST_CDS}),
+        metadata=client.V1ObjectMeta(labels={"run": PERFTEST_CDS}),
         spec=client.V1PodSpec(
             containers=[cds],
-            node_selector=dict(perftest="cds"),
-            volumes=[client.V1Volume(name="license-volume",
-                                     config_map=client.V1ConfigMapVolumeSource(name=RTI_LICENSE))]))
+            volumes=[client.V1Volume(name="license-volume", config_map=client.V1ConfigMapVolumeSource(name=RTI_LICENSE))]))
 
     # Spec
     spec = client.V1DeploymentSpec(
         selector=client.V1LabelSelector(
-            match_labels={"run": PERFTEST_CDS}),
-        replicas=1,
-        template=template)
+            match_labels={"run": PERFTEST_CDS}), 
+            replicas=1, template=template)
 
     # Deployment
     deployment = client.V1Deployment(
@@ -103,15 +81,6 @@ def init_cds_deploy():
 
 
 def create_cds():
-    nodes = list_nodes_name()[1:]  # skip the manager node
-    assert len(nodes) >= 2
-
-    # label CDS node
-    core_v1_api.patch_node(name=nodes[0], body={
-        "metadata": {
-            "labels": {"perftest": "cds"}
-        }})
-
     # create CDS deployment & config map for cds if not existing
     config_map_names = []
     for config_map in core_v1_api.list_namespaced_config_map(namespace="default").items:

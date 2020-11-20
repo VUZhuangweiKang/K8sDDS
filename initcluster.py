@@ -37,13 +37,11 @@ class InitCluster(object):
             self.profile = json.load(f)
 
     def create_pod(self, node_selector, containers, pid=0):
-        pod_name = list(node_selector.keys())[0]
+        pod_name = list(node_selector.values())[0]
         if "pub" in pod_name:
             name = PERFTEST_PUB + str(pid)
-        elif 'sub' in pod_name:
-            name = PERFTEST_SUB + str(pid)
         else:
-            name = PERFTEST_PUB + 'sub'
+            name = PERFTEST_SUB + str(pid)
 
         core_v1_api.create_namespaced_pod(
             namespace="default",
