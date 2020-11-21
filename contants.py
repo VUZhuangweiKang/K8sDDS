@@ -8,4 +8,4 @@ PERFTEST_CDS = "rti-clouddiscoveryservice"
 CDS_PORT = 7400
 
 PERFTEST_IMAGE = "zhuangweikang/rtiperftest-rp:latest"
-RTI_CDS_IMAGE = "kyoungho/rti-clouddiscoveryservice:latest"
+RTI_CDS_IMAGE = "zhuangweikang/rti-clouddiscoveryservice:latest"
