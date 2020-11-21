@@ -10,6 +10,21 @@ apps_v1_api = client.AppsV1Api()
 core_v1_api = client.CoreV1Api()
 
 
+def list_nodes_name():
+    master = []
+    workers = []
+    for node in core_v1_api.list_node().items:
+        flag = False
+        for label in node.metadata.labels:
+            if 'master' in label:
+                master.append(node.metadata.name)
+                flag = True
+                break
+        if not flag:
+            workers.append(node.metadata.name)
+    return master, workers
+
+
 def list_deploys():
     deploys = []
     for deploy in apps_v1_api.list_namespaced_deployment(namespace="default").items:
@@ -62,6 +77,7 @@ def init_cds_deploy():
         metadata=client.V1ObjectMeta(labels={"run": PERFTEST_CDS}),
         spec=client.V1PodSpec(
             containers=[cds],
+            node_selector=dict(perftest="cds"),
             volumes=[client.V1Volume(name="license-volume", config_map=client.V1ConfigMapVolumeSource(name=RTI_LICENSE))]))
 
     # Spec
@@ -81,6 +97,14 @@ def init_cds_deploy():
 
 
 def create_cds():
+    master, _ = list_nodes_name()
+    # label cds node (k8s master)
+    core_v1_api.patch_node(name=master[0], body={
+        "metadata": {
+            "labels": {"perftest": "cds"}
+        }
+    })
+
     # create CDS deployment & config map for cds if not existing
     config_map_names = []
     for config_map in core_v1_api.list_namespaced_config_map(namespace="default").items:

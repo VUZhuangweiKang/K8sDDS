@@ -1,10 +1,11 @@
 FROM ubuntu:18.04
 
-# COPY rti_connext_dds-6.0.1.tar.gz /
-# RUN tar xzvf rti_connext_dds-6.0.1.tar.gz
+ENV LD_LIBRARY_PATH=/app/lib
+ENV CFG_NAME=default
+ENV RTI_LICENSE_FILE=/app/license/rti_license
 
-ENV NDDSHOME=/rti_connext_dds-6.0.1
-ENV LD_LIBRARY_PATH=/rti_connext_dds-6.0.1/lib
+COPY . /app
 
-WORKDIR /rti_connext_dds-6.0.1
-CMD ./bin/rticlouddiscoveryservice
+WORKDIR /app
+
+CMD ./rticlouddiscoveryservice -cfgFile ./config.xml -cfgName $CFG_NAME
