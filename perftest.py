@@ -32,10 +32,10 @@ if __name__ == '__main__':
         for j in range(row['numSubscribers']):
             perftest_cmd = build_cmd('sub', j, row.to_dict())
             pod = PERFTEST_SUB + str(j)
-            k8s_cmd = 'nohup "kubectl exec -t %s -- %s" > logs/%s/%s.log 2>&1 &' % (pod, perftest_cmd, 'test-%d'%row['test'], pod)
+            k8s_cmd = 'nohup kubectl exec -t %s -- %s > logs/%s/%s.log 2>&1 &' % (pod, perftest_cmd, 'test-%d'%row['test'], pod)
             os.system(k8s_cmd)
         perftest_cmd = build_cmd('pub', 0, row.to_dict())
         pod = PERFTEST_PUB + '0'
-        k8s_cmd = 'nohup "kubectl exec -t %s -- %s" > logs/%s/%s.log 2>&1 &' % (pod, perftest_cmd, 'test-%d'%row['test'], pod)
+        k8s_cmd = 'nohup kubectl exec -t %s -- %s > logs/%s/%s.log 2>&1 &' % (pod, perftest_cmd, 'test-%d'%row['test'], pod)
         os.system(k8s_cmd)
         time.sleep(executionTime+3)
