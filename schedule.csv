@@ -1,0 +1,15 @@
+test,dataLen,multicast,numSubscribers,bestEffort,batchSize
+0,64,false,1,false,8192
+1,256,false,1,false,8192
+2,1024,false,1,false,8192
+3,4096,false,1,false,8192
+4,16384,false,1,false,8192
+5,63000,false,1,false,8192
+6,256,false,1,false,8192
+7,256,false,1,true,8192
+8,256,true,1,false,8192
+9,256,true,2,false,8192
+10,256,true,4,false,8192
+11,256,true,8,false,8192
+14,256,false,1,false,0
+15,256,false,1,false,8192

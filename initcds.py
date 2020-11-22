@@ -67,9 +67,10 @@ def init_cds_deploy():
         name="deployment",
         image=RTI_CDS_IMAGE,
         image_pull_policy="Always",
+        tty=True,
         volume_mounts=[client.V1VolumeMount(name="license-volume", mount_path="/app/license")],
         ports=[client.V1ContainerPort(container_port=CDS_PORT, protocol="UDP")],
-        env=[client.V1EnvVar(name="ARGS", value="-verbosity 6")],
+        env=[client.V1EnvVar(name="ARGS", value="-verbosity 6")]
     )
 
     # Template

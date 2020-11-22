@@ -10,13 +10,6 @@ apps_v1_api = client.AppsV1Api()
 core_v1_api = client.CoreV1Api()
 
 
-def init_container(name, image):
-    container = client.V1Container(
-        name=name,
-        image=image
-    )
-    return container
-
 def list_nodes_name():
     master = []
     workers = []
@@ -32,9 +25,9 @@ def list_nodes_name():
     return master, workers
 
 class InitCluster(object):
-    def __init__(self, profile_path):
-        with open(profile_path) as f:
-            self.profile = json.load(f)
+    def __init__(self, num_pubs, num_subs):
+        self.num_pubs = num_pubs
+        self.num_subs = num_subs
 
     def create_pod(self, node_selector, containers, pid=0):
         pod_name = list(node_selector.values())[0]
@@ -63,12 +56,11 @@ class InitCluster(object):
         print("Pod %s is created." % name)
 
     def main(self):
-        meta_args = self.profile['meta']
         master, workers = list_nodes_name()
-        assert len(workers) >= meta_args['numPublishers'] + meta_args['numSubscribers']
+        assert len(workers) >= self.num_pubs + self.num_subs
 
         # label pub nodes
-        for i in range(min(len(workers), meta_args['numPublishers'])):
+        for i in range(min(len(workers), self.num_pubs)):
             core_v1_api.patch_node(name=workers[i], body={
                 "metadata": {
                     "labels": {"perftest": "pub%d" % i}
@@ -76,27 +68,27 @@ class InitCluster(object):
             })
         # create pub pods
         cds_address = "rtps@%s:7400" % PERFTEST_CDS
-        for i in range(meta_args['numPublishers']):
+        for i in range(self.num_pubs):
             containers = [client.V1Container(name=PERFTEST_PUB + str(i), image=PERFTEST_IMAGE,
                                              tty=True,
                                              env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)],
                                              command=['bash'])]
             self.create_pod(dict(perftest="pub%d" % i), containers, i)
 
-        if len(workers) < meta_args['numSubscribers'] + meta_args['numPublishers']:
+        if len(workers) < self.num_subs + self.num_pubs:
             print("There are %d nodes in your cluster, but %d pub and %d sub is going to be run, so some "
                   "pub and sub may run in the same node." %
-                  (len(workers), meta_args['numSubscribers'], meta_args['numPublishers']))
+                  (len(workers), self.num_subs, self.num_pubs))
 
         # label sub nodes
-        for i in range(meta_args['numSubscribers']):
-            core_v1_api.patch_node(name=workers[i + meta_args['numPublishers']], body={
+        for i in range(self.num_subs):
+            core_v1_api.patch_node(name=workers[i + self.num_pubs], body={
                 "metadata": {
                     "labels": {"perftest": "sub%d" % i}
                 }
             })
         # create sub pods
-        for i in range(meta_args['numSubscribers']):
+        for i in range(self.num_subs):
             containers = [client.V1Container(name=PERFTEST_SUB + str(i), image=PERFTEST_IMAGE,
                                              tty=True,
                                              env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)],
@@ -105,5 +97,5 @@ class InitCluster(object):
 
 
 if __name__ == "__main__":
-    ic = InitCluster('profile.json')
+    ic = InitCluster(1, 7)
     ic.main()
