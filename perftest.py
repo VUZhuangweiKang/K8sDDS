@@ -1,13 +1,14 @@
 # encoding: utf-8
 # Author: Zhuangwei Kang
 import os
-import json
-from contants import *
+import time
+from constants import *
 import pandas as pd
 
+executionTime = 120
 
 def build_cmd(role, eid, args):
-    cmd = "./perftest_cpp "
+    cmd = "./perftest_cpp -executionTime %d -cpu -noPrint " % executionTime
     if role == 'pub':
         cmd += '-pub '
         if row['numSubscribers'] > 1:
@@ -29,11 +30,12 @@ if __name__ == '__main__':
     for i, row in schedule.iterrows():
         os.mkdir('logs/test-%d' % i)
         for j in range(row['numSubscribers']):
-            perftest_cmd = build_cmd('pub', row)
+            perftest_cmd = build_cmd('sub', j, row.to_dict())
             pod = PERFTEST_SUB + str(j)
             k8s_cmd = 'nohup "kubectl exec -t %s -- %s" > logs/%s/%s.log 2>&1 &' % (pod, perftest_cmd, 'test-%d'%row['test'], pod)
             os.system(k8s_cmd)
-        perftest_cmd = build_cmd('sub', row)
+        perftest_cmd = build_cmd('pub', 0, row.to_dict())
         pod = PERFTEST_PUB + '0'
         k8s_cmd = 'nohup "kubectl exec -t %s -- %s" > logs/%s/%s.log 2>&1 &' % (pod, perftest_cmd, 'test-%d'%row['test'], pod)
         os.system(k8s_cmd)
+        time.sleep(executionTime+3)

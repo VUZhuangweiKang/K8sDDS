@@ -1,7 +1,7 @@
 # encoding: utf-8
 # Author: Zhuangwei Kang
 import json
-from contants import *
+from constants import *
 from kubernetes import client, config
 
 # Kubernetes API
@@ -49,7 +49,7 @@ class InitCluster(object):
                     containers=containers,
                     restart_policy="Never",
                     node_selector=node_selector,
-                    host_network=(self.profile['meta']['network'] == 'hostnetwork')
+                    volumes=[client.V1Volume(name="license-volume", config_map=client.V1ConfigMapVolumeSource(name=RTI_LICENSE))]
                 )
             ))
 
@@ -69,9 +69,10 @@ class InitCluster(object):
         # create pub pods
         cds_address = "rtps@%s:7400" % PERFTEST_CDS
         for i in range(self.num_pubs):
-            containers = [client.V1Container(name=PERFTEST_PUB + str(i), image=PERFTEST_IMAGE,
+            containers = [client.V1Container(name=PERFTEST_PUB + str(i), image=PERFTEST_IMAGE, image_pull_policy='Always',
                                              tty=True,
                                              env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)],
+                                             volume_mounts=[client.V1VolumeMount(name="license-volume", mount_path="/app/license")],
                                              command=['bash'])]
             self.create_pod(dict(perftest="pub%d" % i), containers, i)
 
@@ -89,9 +90,10 @@ class InitCluster(object):
             })
         # create sub pods
         for i in range(self.num_subs):
-            containers = [client.V1Container(name=PERFTEST_SUB + str(i), image=PERFTEST_IMAGE,
+            containers = [client.V1Container(name=PERFTEST_SUB + str(i), image=PERFTEST_IMAGE, image_pull_policy='Always',
                                              tty=True,
                                              env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)],
+                                             volume_mounts=[client.V1VolumeMount(name="license-volume", mount_path="/app/license")],
                                              command=['bash'])]
             self.create_pod(dict(perftest="sub%d" % i), containers, i)
 
