@@ -69,7 +69,7 @@ class InitCluster(object):
         # create pub pods
         cds_address = "rtps@%s:7400" % PERFTEST_CDS
         for i in range(self.num_pubs):
-            containers = [client.V1Container(name=PERFTEST_PUB + str(i), image=PERFTEST_IMAGE, image_pull_policy='Always',
+            containers = [client.V1Container(name=PERFTEST_PUB + str(i), image=PERFTEST_IMAGE, image_pull_policy='IfNotPresent',
                                              tty=True,
                                              env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)],
                                              volume_mounts=[client.V1VolumeMount(name="license-volume", mount_path="/app/license")],
@@ -90,7 +90,7 @@ class InitCluster(object):
             })
         # create sub pods
         for i in range(self.num_subs):
-            containers = [client.V1Container(name=PERFTEST_SUB + str(i), image=PERFTEST_IMAGE, image_pull_policy='Always',
+            containers = [client.V1Container(name=PERFTEST_SUB + str(i), image=PERFTEST_IMAGE, image_pull_policy='IfNotPresent',
                                              tty=True,
                                              env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)],
                                              volume_mounts=[client.V1VolumeMount(name="license-volume", mount_path="/app/license")],
@@ -99,5 +99,5 @@ class InitCluster(object):
 
 
 if __name__ == "__main__":
-    ic = InitCluster(1, 7)
+    ic = InitCluster(1, 8)
     ic.main()
