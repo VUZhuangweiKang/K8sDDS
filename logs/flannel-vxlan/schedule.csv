@@ -11,7 +11,3 @@ dataLen,multicast,numSubscribers,bestEffort,batchSize
 256,false,4,false,0
 256,false,8,false,0
 256,false,1,false,8192
-256,true,1,false,0
-256,true,2,false,0
-256,true,4,false,0
-256,true,8,false,0

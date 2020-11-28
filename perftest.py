@@ -1,6 +1,6 @@
 # encoding: utf-8
 # Author: Zhuangwei Kang
-import os
+import os, sys
 import time
 from constants import *
 import pandas as pd
@@ -28,8 +28,12 @@ def build_cmd(role, eid, args):
 
 if __name__ == '__main__':
     schedule = pd.read_csv('schedule.csv')
+    start_from = sys.argv[1]
     for i, row in schedule.iterrows():
-        print('test-%d start at: %s' % (i, time.time()))
+        if i < int(start_from):
+            continue
+        start = time.time()
+        print('test-%d started' % i)
         os.mkdir('logs/test-%d' % i)
         for j in range(row['numSubscribers']):
             perftest_cmd = build_cmd('sub', j, row.to_dict())
@@ -42,9 +46,9 @@ if __name__ == '__main__':
         os.system(k8s_cmd)
         while True:
             try:
-                subprocess.check_output('pgrep kubelet', shell=True)
+                subprocess.check_output('pgrep kubectl', shell=True)
             except:
                 break
             time.sleep(3)
-        print('test-%d end at: %s' % (i, time.time()))
+        print('test-%d end, elapsed time: %ss' % (i, time.time()-start))
         print('-------------------------')
