@@ -3,15 +3,21 @@
 import os, sys
 import time
 from constants import *
+from datapsr import *
 import pandas as pd
 import subprocess
+import argparse
 
 executionTime = 120
 
-def build_cmd(role, eid, args):
-    cmd = "./perftest_cpp -executionTime %d -cpu -noPrint " % executionTime
+def build_cmd(role, eid, args, latTest, sendQueueSize=50, noPrint=True):
+    cmd = "./perftest_cpp -executionTime %d -cpu -nic eth0 " % executionTime
+    if noPrint:
+        cmd += "-noPrint "
+    if latTest:
+        cmd += "-latencyTest "
     if role == 'pub':
-        cmd += '-pub '
+        cmd += '-pub -sendQueueSize %d ' % sendQueueSize
         if row['numSubscribers'] > 1:
             cmd += "-numSubscribers %d " % row['numSubscribers']
     else:
@@ -27,20 +33,26 @@ def build_cmd(role, eid, args):
 
 
 if __name__ == '__main__':
-    schedule = pd.read_csv('schedule.csv')
-    start_from = sys.argv[1]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--sch', type=str, default='schedule.csv', help='path of schedule file')
+    parser.add_argument('--fromI', type=int, default=0, help='start test from specified index')
+    parser.add_argument('--latencyTest', action='store_true', help='run latency test')
+    parser.add_argument('--noPrint', action='store_true', help='don\'t print perftest details')
+    parser.add_argument('--sendQueueSize', type=int, default=50, help='publisher send queue size')
+    args = parser.parse_args()
+    schedule = pd.read_csv(args.sch)
     for i, row in schedule.iterrows():
-        if i < int(start_from):
+        if i < args.fromI:
             continue
         start = time.time()
         print('test-%d started' % i)
         os.mkdir('logs/test-%d' % i)
         for j in range(row['numSubscribers']):
-            perftest_cmd = build_cmd('sub', j, row.to_dict())
+            perftest_cmd = build_cmd('sub', j, row.to_dict(), args.latencyTest, noPrint=args.noPrint)
             pod = PERFTEST_SUB + str(j)
             k8s_cmd = 'nohup kubectl exec -t %s -- %s > logs/%s/%s.log 2>&1 &' % (pod, perftest_cmd, 'test-%d'%i, pod)
             os.system(k8s_cmd)
-        perftest_cmd = build_cmd('pub', 0, row.to_dict())
+        perftest_cmd = build_cmd('pub', 0, row.to_dict(), args.latencyTest, args.sendQueueSize, args.noPrint)
         pod = PERFTEST_PUB + '0'
         k8s_cmd = 'nohup kubectl exec -t %s -- %s > logs/%s/%s.log 2>&1 &' % (pod, perftest_cmd, 'test-%d'%i, pod)
         os.system(k8s_cmd)
@@ -49,6 +61,5 @@ if __name__ == '__main__':
                 subprocess.check_output('pgrep kubectl', shell=True)
             except:
                 break
-            time.sleep(3)
         print('test-%d end, elapsed time: %ss' % (i, time.time()-start))
         print('-------------------------')
