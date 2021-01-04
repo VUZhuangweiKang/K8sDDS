@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rtiperftest-pub0
+  namespace: default
+  labels:
+    app: pub_svc
+spec:
+  containers:
+  - command:
+    - bash
+    env:
+    - name: NDDS_DISCOVERY_PEERS
+      value: rtps@rti-clouddiscoveryservice:7400
+    image: zhuangweikang/rtiperftest-rp:latest
+    imagePullPolicy: IfNotPresent
+    name: rtiperftest-pub0
+    resources: {}
+    tty: true
+    volumeMounts:
+    - mountPath: /app/license
+      name: license-volume
+  nodeSelector:
+    perftest: pub0
+  restartPolicy: Never
+  volumes:
+  - configMap:
+      name: rti-license
+    name: license-volume

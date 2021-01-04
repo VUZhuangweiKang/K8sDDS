@@ -1,0 +1,36 @@
+RTI Perftest 3.0.1 a7a8334 (RTI Connext DDS 6.0.0)
+
+Mode: LATENCY TEST (Ping-Pong test)
+
+Perftest Configuration:
+	Reliability: Best Effort
+	Keyed: No
+	Publisher ID: 0
+	Latency count: 1 latency sample every 1 samples
+	Data Size: 256
+	Batching: No (Use "-batchSize" to setup batching)
+	Publication Rate: Unlimited (Not set)
+	Execution time: 120 seconds
+	Receive using: Listeners
+	Domain: 1
+	Dynamic Data: No
+	FlatData: No
+	Zero Copy: No
+	Asynchronous Publishing: No
+	XML File: perftest_qos_profiles.xml
+
+Transport Configuration:
+	Kind: TCP
+	Nic: eth0
+	Use Multicast: False
+	TCP Server Bind Port: 7400
+	TCP LAN/WAN mode: LAN
+
+Waiting to discover 1 subscribers ...
+Waiting for subscribers announcement ...
+Sending 50 initialization pings ...
+Publishing data ...
+Finishing test due to timer...
+Length:   256  Latency: Ave   1470 us  Std  365.6 us  Min   1105 us  Max  12101 us  50%   1410 us  90%   1692 us 99%   2520 us  99.99%   9799 us  99.9999%  12101 us CPU: 7.26%
+Test ended.
+Serialization/Deserialization: 1.118 us / 0.947 us / TOTAL: 2.065 us

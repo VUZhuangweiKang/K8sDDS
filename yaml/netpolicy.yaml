@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: traffic-shaper
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: pub_svc
+  policyTypes:
+  - Egress
+  - Ingress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.244.0.0/16
+        except:
+        - 10.244.6.0/24
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 10.244.0.0/16
+        except:
+        - 10.244.6.0/24

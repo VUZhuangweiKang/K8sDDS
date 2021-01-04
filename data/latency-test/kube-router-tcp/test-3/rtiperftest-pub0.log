@@ -1,0 +1,37 @@
+RTI Perftest 3.0.1 a7a8334 (RTI Connext DDS 6.0.0)
+
+Mode: LATENCY TEST (Ping-Pong test)
+
+Perftest Configuration:
+	Reliability: Reliable
+	Keyed: No
+	Publisher ID: 0
+	Latency count: 1 latency sample every 1 samples
+	Data Size: 4096
+	Batching: No (Use "-batchSize" to setup batching)
+	Publication Rate: Unlimited (Not set)
+	Execution time: 120 seconds
+	Receive using: Listeners
+	Domain: 1
+	Dynamic Data: No
+	FlatData: No
+	Zero Copy: No
+	Asynchronous Publishing: No
+	XML File: perftest_qos_profiles.xml
+
+Transport Configuration:
+	Kind: TCP
+	Nic: eth0
+	Use Multicast: False
+	TCP Server Bind Port: 7400
+	TCP LAN/WAN mode: LAN
+
+Waiting to discover 1 subscribers ...
+Waiting for subscribers announcement ...
+Sending 50 initialization pings ...
+Publishing data ...
+Length:  4096  Latency: Ave   1381 us  Std  267.0 us  Min   1124 us  Max  14609 us  50%   1343 us  90%   1525 us 99%   2082 us  99.99%   9317 us  99.9999%  14609 us CPU: 9.57%
+Finishing test due to timer...
+Test ended.
+Serialization/Deserialization: 3.001 us / 2.649 us / TOTAL: 5.650 us
+NDDS_Transport_TCPv4_Plugin_clientCloseControlConnection_connEA:attempt to remove socket 10 from socket group 0x2b7fe88 failed

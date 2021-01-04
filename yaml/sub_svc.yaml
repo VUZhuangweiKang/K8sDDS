@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: subscriber-svc
+  name: subscriber-svc
+  namespace: default
+spec:
+  ports:
+  - name: discovery-unicast
+    port: 7660
+    protocol: UDP
+    targetPort: 7660
+  - name: user-unicast
+    port: 7661
+    protocol: UDP
+    targetPort: 7661
+  selector:
+    app: sub_svc
+  type: ClusterIP

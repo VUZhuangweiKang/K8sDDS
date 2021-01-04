@@ -246,6 +246,18 @@ _KeepDurationUsec variable name corresponds to the command-line option -keepDura
           <name>PerfTest Participant</name>
         </participant_name>
 
+        <!--
+          Discovery QoS for detetcting participant liveliness
+        -->
+        <discovery_config>
+          <participant_liveliness_lease_duration>
+            <sec>5</sec>
+          </participant_liveliness_lease_duration>
+          <participant_liveliness_assert_period>
+            <sec>3</sec>
+          </participant_liveliness_assert_period>
+        </discovery_config>
+
       </participant_qos>
 
       <!-- === Publisher Configuration: ================================= 

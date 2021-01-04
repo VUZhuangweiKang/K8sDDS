@@ -71,7 +71,8 @@ class InitCluster(object):
         for i in range(self.num_pubs):
             containers = [client.V1Container(name=PERFTEST_PUB + str(i), image=PERFTEST_IMAGE, image_pull_policy='IfNotPresent',
                                              tty=True,
-                                             env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)],
+                                             env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address),
+                                                client.V1EnvVar(name="LD_LIBRARY_PATH", value="/lib/dds")],
                                              volume_mounts=[client.V1VolumeMount(name="license-volume", mount_path="/app/license")],
                                              command=['bash'])]
             self.create_pod(dict(perftest="pub%d" % i), containers, i)
@@ -92,7 +93,8 @@ class InitCluster(object):
         for i in range(self.num_subs):
             containers = [client.V1Container(name=PERFTEST_SUB + str(i), image=PERFTEST_IMAGE, image_pull_policy='IfNotPresent',
                                              tty=True,
-                                             env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address)],
+                                             env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address), 
+                                                client.V1EnvVar(name="LD_LIBRARY_PATH", value="/lib/dds")],
                                              volume_mounts=[client.V1VolumeMount(name="license-volume", mount_path="/app/license")],
                                              command=['bash'])]
             self.create_pod(dict(perftest="sub%d" % i), containers, i)
