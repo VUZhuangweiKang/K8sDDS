@@ -1,9 +1,9 @@
 # encoding: utf-8
 # Author: Zhuangwei Kang
 
-import os, sys
-from constants import *
+from Deployment.constants import *
 from kubernetes import client, config
+
 
 # Kubernetes API
 config.load_kube_config(config_file='~/.kube/config')

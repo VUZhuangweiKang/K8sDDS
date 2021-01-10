@@ -1,14 +1,14 @@
 # encoding: utf-8
 # Author: Zhuangwei Kang
-import os, sys
 import time
-from constants import *
-from datapsr import *
+from Deployment.constants import *
+from Notebooks.datapsr import *
 import pandas as pd
 import subprocess
 import argparse
 
 executionTime = 120
+
 
 def build_cmd(role, eid, args, latTest, sendQueueSize=50, noPrint=True, tcp=False):
     cmd = "./perftest_cpp -executionTime %d -cpu -nic eth0 " % executionTime
