@@ -19,7 +19,7 @@ sed '$s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 swapaccount
 sudo swpaoff -a
 
 # Step 3. Link DNS resolver config file
-sudo ln -s /etc/resolv.conf /run/systemd/resolve/resolv.conf
+sudo ln -s /etc/resolv.conf /run/systemd/resolve/
 
 # Step 4. Initialize cluster
 # WeaveNet

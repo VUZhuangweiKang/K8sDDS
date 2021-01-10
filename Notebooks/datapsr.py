@@ -58,9 +58,9 @@ def load_data(tests, plugins, latencyTest=False):
     for cni in plugins:
         for t in tests:
             perfs = []
-            subs = [sub for sub in os.listdir('data/%s/%s/test-%d/' % (test, cni, t)) if 'sub' in sub]
+            subs = [sub for sub in os.listdir('../Data/%s/%s/test-%d/' % (test, cni, t)) if 'sub' in sub]
             for sub in subs:
-                perftest_output = find_line('data/%s/%s/test-%d/%s' % (test, cni, t, sub))
+                perftest_output = find_line('../Data/%s/%s/test-%d/%s' % (test, cni, t, sub))
                 tperf = parse_throughput(perftest_output)
                 perfs.append(tperf)
             avg_perf = {}
@@ -74,7 +74,7 @@ def load_data(tests, plugins, latencyTest=False):
             avg_perf.update({'test': t, 'cni': cni})
             throughput_perf.append(avg_perf)
 
-            perftest_output = find_line('data/%s/%s/test-%d/rtiperftest-pub0.log' % (test, cni, t))
+            perftest_output = find_line('../Data/%s/%s/test-%d/rtiperftest-pub0.log' % (test, cni, t))
             lperf = parse_latency(perftest_output)
             lperf.update({'test': t, 'cni': cni})
             latency_perf.append(lperf)

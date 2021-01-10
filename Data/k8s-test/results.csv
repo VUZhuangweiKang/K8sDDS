@@ -11,11 +11,10 @@ Join,0m28.723s,0m33.910s
 Join,0m26.834s,0m26.674s
 Join,0m30.629s,0m35.631s
 Join,0m28.964s,0m39.911s
-GetNode,0m7.457s,0m7.457s
-GetNode,0m2.259s,0m2.259s
-GetNode,0m2.594s,0m2.594s
-GetNode,0m2.253s,0m2.253s
-GetNode,0m2.425s,0m2.425s
-GetNode,0m2.227s,0m2.227s
-GetNode,0m2.331s,0m2.331s
-GetNode,0m2.910s,0m2.910s
+GetNode,0m2.259s,0m0.222s
+GetNode,0m2.594s,0m0.207s
+GetNode,0m2.253s, 0m0.224s
+GetNode,0m2.425s, 0m0.225s
+GetNode,0m2.227s,0m0.205s
+GetNode,0m2.331s,0m0.203s
+GetNode,0m2.910s,0m0.218s
