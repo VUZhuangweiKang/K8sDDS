@@ -18,6 +18,6 @@ elif [ "$1" = "kube-router" ]; then
   kubectl apply -f ../CNI/kube-router/kubeadm-kuberouter.yaml
 fi
 
-kubectl taint nodes $(hostname) node-role.kubernetes.io/master-
+kubectl taint nodes $(hostname | awk '{print tolower($0)}') node-role.kubernetes.io/master-
 kubectl get pod -n kube-system
 

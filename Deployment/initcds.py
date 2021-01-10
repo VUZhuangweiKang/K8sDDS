@@ -1,7 +1,7 @@
 # encoding: utf-8
 # Author: Zhuangwei Kang
 
-from Deployment.constants import *
+from constants import *
 from kubernetes import client, config
 
 
