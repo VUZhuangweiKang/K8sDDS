@@ -179,4 +179,4 @@ Serialization/Deserialization: 1.559 us / 0.894 us / TOTAL: 2.453 us
 Test ended.
 ```
 
-Experiment results parser will capture and parse the "Length:" line from the above log files. Throughput tests results are plotted by Notebooks/throughput-parser.ipynb and latency tests reults are plotted by Notebooks/latency-parser.ipynb.
+Experiment results parser will capture and parse the "Length:" line from the above log files. Throughput tests results are plotted by [throughput-parser](Notebooks/throughput-parser.ipynb) and latency tests reults are plotted by [latency-parser.ipynb](Notebooks/latency-parser.ipynb).
