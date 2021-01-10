@@ -102,3 +102,81 @@ optional arguments:
 ```
 
 Note: schedule.csv contains arguments for perftest application. There are four configurable options in schedule.csv now, including dataLen,multicast,numSubscribers,bestEffor and batchSize. More command-line parameters can be found [here](https://community.rti.com/static/documentation/perftest/current/command_line_parameters.html).
+
+## Collect Experiment Data
+
+All experiments output are redirect to the master node and stored into the foler: logs/test-<ID>/<pod name>.log
+
+Throughput tests output format:
+
+```
+RTI Perftest 3.0.1 a7a8334 (RTI Connext DDS 6.0.0)
+
+Perftest Configuration:
+	Reliability: Reliable
+	Keyed: No
+	Subscriber ID: 0
+	Data Size: 64
+	Receive using: Listeners
+	Domain: 1
+	Dynamic Data: No
+	FlatData: No
+	Zero Copy: No
+	XML File: perftest_qos_profiles.xml
+
+Transport Configuration:
+	Kind: TCP
+	Nic: eth0
+	Use Multicast: False
+	TCP Server Bind Port: 7400
+	TCP LAN/WAN mode: LAN
+
+Waiting to discover 1 publishers ...
+Waiting for data...
+Length:    64  Packets:   756371  Packets/s(ave):    6302  Mbps(ave):     3.2  Lost:     0 (0.00%) CPU: 22.30%
+Finishing test...
+Test ended.
+```
+
+Latency tests output format:
+
+```
+RTI Perftest 3.0.1 a7a8334 (RTI Connext DDS 6.0.0)
+
+Mode: LATENCY TEST (Ping-Pong test)
+
+Perftest Configuration:
+	Reliability: Reliable
+	Keyed: No
+	Publisher ID: 0
+	Latency count: 1 latency sample every 1 samples
+	Data Size: 64
+	Batching: No (Use "-batchSize" to setup batching)
+	Publication Rate: Unlimited (Not set)
+	Execution time: 120 seconds
+	Receive using: Listeners
+	Domain: 1
+	Dynamic Data: No
+	FlatData: No
+	Zero Copy: No
+	Asynchronous Publishing: No
+	XML File: perftest_qos_profiles.xml
+
+Transport Configuration:
+	Kind: TCP
+	Nic: eth0
+	Use Multicast: False
+	TCP Server Bind Port: 7400
+	TCP LAN/WAN mode: LAN
+
+Waiting to discover 1 subscribers ...
+Waiting for subscribers announcement ...
+Sending 50 initialization pings ...
+Publishing data ...
+Length:    64  Latency: Ave    720 us  Std  196.8 us  Min    560 us  Max  12931 us  50%    685 us  90%    851 us 99%   1204 us  99.99%   7815 us  99.9999%  12931 us CPU: 11.27%
+Finishing test due to timer...
+Serialization/Deserialization: 1.559 us / 0.894 us / TOTAL: 2.453 us
+Test ended.
+```
+
+Experiment results parser will capture and parse the "Length:" line from the above log files. Throughput tests results are plotted by Notebooks/throughput-parser.ipynb and latency tests reults are plotted by Notebooks/latency-parser.ipynb.
