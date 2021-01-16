@@ -4,9 +4,9 @@ if [ "$1" = "weavenet" ]; then
   if [ "$2" = "encrypt" ]; then
     echo $(tr -dc A-Za-z0-9 </dev/urandom | head -c 13 ; echo '') > weave-passwd
     kubectl create secret -n kube-system generic weave-passwd --from-file=./weave-passwd
-    kubectl apply -f ../CNI/weavenet/weavenet-daemonset-k8s-1.9-with-pwd.yaml
+    kubectl apply -f ../CNI/weave/weave-daemonset-k8s-1.9-with-pwd.yaml
   else
-    kubectl apply -f ../CNI/weavenet/weavenet-daemonset-k8s-1.9.yaml
+    kubectl apply -f ../CNI/weave/weave-daemonset-k8s-1.9.yaml
   fi
 elif [ "$1" = "flannel" ]; then
   if [ "$2" = "host-gw" ]; then
