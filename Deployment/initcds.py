@@ -1,6 +1,7 @@
 # encoding: utf-8
 # Author: Zhuangwei Kang
 
+import sys
 from constants import *
 from kubernetes import client, config
 
@@ -51,7 +52,7 @@ def list_services():
     return services
 
 
-def create_cds_service():
+def create_cds_service(protocol):
     if PERFTEST_CDS not in list_services():
         body = client.V1Service(
             api_version="v1",
@@ -59,19 +60,24 @@ def create_cds_service():
             metadata=client.V1ObjectMeta(name=PERFTEST_CDS, labels={"run": PERFTEST_CDS}),
             spec=client.V1ServiceSpec(
                 selector={"run": PERFTEST_CDS},
-                ports=[client.V1ServicePort(port=CDS_PORT, protocol="UDP")]))
+                ports=[client.V1ServicePort(port=CDS_PORT, protocol=protocol)]))
         core_v1_api.create_namespaced_service(namespace="default", body=body)
 
 
-def init_cds_deploy():
+def init_cds_deploy(protocol):
+    cmd = ['./rticlouddiscoveryservice']
+    if protocol == 'TCP':
+        cmd.extend(['-transport', 'tcpv4_lan:7400'])
     cds = client.V1Container(
         name="deployment",
         image=RTI_CDS_IMAGE,
         image_pull_policy="Always",
         tty=True,
         volume_mounts=[client.V1VolumeMount(name="license-volume", mount_path="/app/license")],
-        ports=[client.V1ContainerPort(container_port=CDS_PORT, protocol="UDP")],
-        env=[client.V1EnvVar(name="ARGS", value="-verbosity 6")]
+        ports=[client.V1ContainerPort(container_port=CDS_PORT, protocol=protocol)],
+        env=[client.V1EnvVar(name="ARGS", value="-verbosity 6"), 
+             client.V1EnvVar(name='LD_LIBRARY_PATH', value='/app/lib')],
+        command=cmd
     )
 
     # Template
@@ -98,7 +104,7 @@ def init_cds_deploy():
     return deployment
 
 
-def create_cds():
+def create_cds(protocol):
     master, _ = list_nodes_name()
     # label cds node (k8s master)
     core_v1_api.patch_node(name=master[0], body={
@@ -121,9 +127,13 @@ def create_cds():
             metadata=client.V1ObjectMeta(name=RTI_LICENSE))
         core_v1_api.create_namespaced_config_map(namespace="default", body=config_map)
 
-    create_deployment(init_cds_deploy())
-    create_cds_service()
+    create_deployment(init_cds_deploy(protocol))
+    create_cds_service(protocol)
 
 
 if __name__ == "__main__":
-    create_cds()
+    if len(sys.argv) > 1 and sys.argv[1] == 'TCP':
+        protocol = 'TCP'
+    else:
+        protocol = 'UDP'
+    create_cds(protocol)

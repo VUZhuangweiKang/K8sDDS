@@ -1,5 +1,6 @@
 # encoding: utf-8
 # Author: Zhuangwei Kang
+import sys
 from constants import *
 from kubernetes import client, config
 
@@ -57,7 +58,7 @@ class InitCluster(object):
         self.num_pubs = num_pubs
         self.num_subs = num_subs
 
-    def main(self):
+    def main(self, cds):
         master, workers = list_nodes_name()
         assert len(workers) >= self.num_pubs + self.num_subs
 
@@ -68,16 +69,23 @@ class InitCluster(object):
                     "labels": {"perftest": "pub%d" % i}
                 }
             })
+        
+        # environment variable
+        env = [client.V1EnvVar(name="LD_LIBRARY_PATH", value="/app/lib")]
+        if cds:
+            cds_address = "rtps@%s:7400" % PERFTEST_CDS
+            env.append(client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address))
+        
+        # volume
+        volume = [client.V1VolumeMount(name="license-volume", mount_path="/app/license")]
+
         # create pub pods
-        cds_address = "rtps@%s:7400" % PERFTEST_CDS
         for i in range(self.num_pubs):
             containers = [
                 client.V1Container(name=PERFTEST_PUB + str(i), image=PERFTEST_IMAGE, image_pull_policy='Always',
                                    tty=True,
-                                   env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address),
-                                        client.V1EnvVar(name="LD_LIBRARY_PATH", value="/app/lib")],
-                                   volume_mounts=[
-                                       client.V1VolumeMount(name="license-volume", mount_path="/app/license")],
+                                   env=env,
+                                   volume_mounts=volume,
                                    command=['bash'])]
             create_pod(dict(perftest="pub%d" % i), containers, i)
 
@@ -98,14 +106,15 @@ class InitCluster(object):
             containers = [
                 client.V1Container(name=PERFTEST_SUB + str(i), image=PERFTEST_IMAGE, image_pull_policy='Always',
                                    tty=True,
-                                   env=[client.V1EnvVar(name="NDDS_DISCOVERY_PEERS", value=cds_address),
-                                        client.V1EnvVar(name="LD_LIBRARY_PATH", value="/lib/dds")],
-                                   volume_mounts=[
-                                       client.V1VolumeMount(name="license-volume", mount_path="/app/license")],
+                                   env=env,
+                                   volume_mounts=volume,
                                    command=['bash'])]
             create_pod(dict(perftest="sub%d" % i), containers, i)
 
 
 if __name__ == "__main__":
     ic = InitCluster(1, 8)
-    ic.main()
+    if len(sys.argv) > 1 and sys.argv[1] == 'cds':
+        ic.main(cds=True)
+    else:
+        ic.main(cds=False)

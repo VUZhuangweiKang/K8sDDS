@@ -1,7 +1,7 @@
 # encoding: utf-8
 # Author: Zhuangwei Kang
 import time
-from Deployment.constants import *
+from constants import *
 from Notebooks.datapsr import *
 import pandas as pd
 import subprocess
@@ -40,6 +40,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--sch', type=str, default='schedule.csv', help='path of schedule file')
     parser.add_argument('--fromI', type=int, default=0, help='start test from specified index')
+    parser.add_argument('--toI', type=int, default=100, help='end test at specified index')
     parser.add_argument('--latencyTest', action='store_true', help='run latency test')
     parser.add_argument('--noPrint', action='store_true', help='don\'t print perftest details')
     parser.add_argument('--sendQueueSize', type=int, default=50, help='publisher send queue size')
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     schedule = pd.read_csv(args.sch)
     for i, row in schedule.iterrows():
-        if i < args.fromI:
+        if i < args.fromI or i > args.toI:
             continue
         start = time.time()
         print('test-%d started' % i)
