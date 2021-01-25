@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-for i in {1..9} ; do
-    ssh worker$i "sudo $(sudo kubeadm token create --print-join-command)"
+for i in {1..10} ; do
+    ssh pi$i "sudo $(sudo kubeadm token create --print-join-command)"
 done

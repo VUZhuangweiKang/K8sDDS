@@ -29,7 +29,7 @@ def parse_output(output, fields):
     return data
 
 
-def parse_latency(perftest_output, dds_secure=False):
+def parse_latency(perftest_output, format2=False):
     '''
     Example perftest_output
     # if dds_secure is True
@@ -42,7 +42,7 @@ def parse_latency(perftest_output, dds_secure=False):
     '''
     
     fields = ['CPU:', '99.9999%', '99.99%', '99%', '90%', '50%', 'Max', 'Min', 'Std', 'Latency: Ave', 'Length:']
-    if not dds_secure:
+    if not format2:
         latency_perf = parse_output(perftest_output, fields)
     else:
         latency_perf = {}
@@ -50,11 +50,11 @@ def parse_latency(perftest_output, dds_secure=False):
         perftest_output = [float(x.strip()) for x in perftest_output]
         perftest_output.reverse()
         for i in range(len(fields)):
-            latency_perf.update({fields[i].lower().replace(':', ''): perftest_output[i]})
+            latency_perf.update({fields[i].lower().replace(':', '').replace(' ', '').replace('.', '_'): perftest_output[i]})
     return latency_perf
 
 
-def parse_throughput(perftest_output, dds_secure=False):
+def parse_throughput(perftest_output, format2=False):
     '''
     Example perftest_output
     # if dds_secure is True
@@ -66,7 +66,7 @@ def parse_throughput(perftest_output, dds_secure=False):
     '''
 
     fields = ['CPU:', 'Lost:', 'Mbps(ave):', 'Packets/s(ave):', 'Packets:', 'Length:']
-    if not dds_secure:
+    if not format2:
         throughput_perf = parse_output(perftest_output, fields)
     else:
         throughput_perf = {}
@@ -75,17 +75,18 @@ def parse_throughput(perftest_output, dds_secure=False):
         del perftest_output[-3]
         perftest_output.reverse()
         for i in range(len(fields)):
-            throughput_perf.update({fields[i].lower().replace(':', ''): perftest_output[i]})
+            throughput_perf.update({fields[i].lower().replace(':', '').replace(' ', '').replace('.', '_'): perftest_output[i]})
     return throughput_perf
 
 
 # DDS Secure has different output format with others
-def find_line(fname, dds_secure=False):
-    with open(fname) as f:
+def find_line(fname, format2=False):
+    # print(fname)
+    with open(fname, encoding='utf-8', errors='ignore') as f:
         lines = f.readlines()
         for i, l in enumerate(lines):
             if 'Length' in l:
-                if not dds_secure:
+                if not format2:
                     return l
                 else:
                     return lines[i+1]
@@ -99,17 +100,17 @@ def load_data(tests, plugins, latencyTest=False):
     else:
         test = 'throughput-test'
     for cni in plugins:
-        if 'dds-secure' in cni:
-            dds_secure = True
+        if 'dds-secure' in cni or 'tls' in cni:
+            format2 = True
         else:
-            dds_secure = False
+            format2 = False
 
         for t in tests:
             perfs = []
             subs = [sub for sub in os.listdir('../Data/%s/%s/test-%d/' % (test, cni, t)) if 'sub' in sub]
             for sub in subs:
-                perftest_output = find_line('../Data/%s/%s/test-%d/%s' % (test, cni, t, sub), dds_secure)
-                tperf = parse_throughput(perftest_output, dds_secure)
+                perftest_output = find_line('../Data/%s/%s/test-%d/%s' % (test, cni, t, sub), format2)
+                tperf = parse_throughput(perftest_output, format2)
                 perfs.append(tperf)
             avg_perf = {}
             for fld in perfs[0]:
@@ -122,8 +123,8 @@ def load_data(tests, plugins, latencyTest=False):
             avg_perf.update({'test': t, 'cni': cni})
             throughput_perf.append(avg_perf)
 
-            perftest_output = find_line('../Data/%s/%s/test-%d/rtiperftest-pub0.log' % (test, cni, t), dds_secure)
-            lperf = parse_latency(perftest_output, dds_secure)
+            perftest_output = find_line('../Data/%s/%s/test-%d/rtiperftest-pub0.log' % (test, cni, t), format2)
+            lperf = parse_latency(perftest_output, format2)
             lperf.update({'test': t, 'cni': cni})
             latency_perf.append(lperf)
     return pd.DataFrame(throughput_perf), pd.DataFrame(latency_perf)      

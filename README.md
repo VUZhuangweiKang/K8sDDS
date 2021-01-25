@@ -16,7 +16,7 @@
 sed '$s/$/ cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1 swapaccount=1/' /boot/cmdline.txt
 
 # Step 2. Turn off swap in all nodes
-sudo swpaoff -a
+sudo swapoff -a
 
 # Step 3. Link DNS resolver config file
 sudo ln -s /etc/resolv.conf /run/systemd/resolve/
@@ -87,18 +87,23 @@ kubectl get pods -o wide
 ```shell
 python3 perftest.py -h
 
-usage: perftest.py [-h] [--sch SCH] [--fromI FROMI] [--latencyTest]
-                   [--noPrint] [--sendQueueSize SENDQUEUESIZE] [--tcp]
+usage: perftest.py [-h] [--sch SCH] [--fromI FROMI] [--toI TOI]
+                   [--latencyTest] [--noPrint] [--sendQueueSize SENDQUEUESIZE]
+                   [--transport {UDP,TCP,TLS}] [--secure] [--peers]
 
 optional arguments:
   -h, --help            show this help message and exit
   --sch SCH             path of schedule file
   --fromI FROMI         start test from specified index
+  --toI TOI             end test at specified index
   --latencyTest         run latency test
   --noPrint             don't print perftest details
   --sendQueueSize SENDQUEUESIZE
                         publisher send queue size
-  --tcp                 use TCP transport protocol
+  --transport {UDP,TCP,TLS}
+                        the transport protocol will be used in the test
+  --secure              enable DDS security plugin
+  --peers               make participants find each other using peer address
 ```
 
 Note: schedule.csv contains arguments for perftest application. There are four configurable options in schedule.csv now, including dataLen,multicast,numSubscribers,bestEffor and batchSize. More command-line parameters can be found [here](https://community.rti.com/static/documentation/perftest/current/command_line_parameters.html).

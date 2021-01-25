@@ -3,6 +3,7 @@
 import sys
 from constants import *
 from kubernetes import client, config
+import argparse
 
 # Kubernetes API
 config.load_kube_config(config_file='~/.kube/config')
@@ -25,7 +26,7 @@ def list_nodes_name():
     return master, workers
 
 
-def create_pod(node_selector, containers, pid=0):
+def create_pod(node_selector, containers, pid=0, host_network=False):
     pod_name = list(node_selector.values())[0]
     if "pub" in pod_name:
         name = PERFTEST_PUB + str(pid)
@@ -45,8 +46,8 @@ def create_pod(node_selector, containers, pid=0):
                 containers=containers,
                 restart_policy="Never",
                 node_selector=node_selector,
-                volumes=[
-                    client.V1Volume(name="license-volume", config_map=client.V1ConfigMapVolumeSource(name=RTI_LICENSE))]
+                volumes=[client.V1Volume(name="license-volume", config_map=client.V1ConfigMapVolumeSource(name=RTI_LICENSE))],
+                host_network=host_network
             )
         ))
 
@@ -58,7 +59,7 @@ class InitCluster(object):
         self.num_pubs = num_pubs
         self.num_subs = num_subs
 
-    def main(self, cds):
+    def main(self, cds, hostnetwork):
         master, workers = list_nodes_name()
         assert len(workers) >= self.num_pubs + self.num_subs
 
@@ -87,7 +88,7 @@ class InitCluster(object):
                                    env=env,
                                    volume_mounts=volume,
                                    command=['bash'])]
-            create_pod(dict(perftest="pub%d" % i), containers, i)
+            create_pod(dict(perftest="pub%d" % i), containers, i, hostnetwork)
 
         if len(workers) < self.num_subs + self.num_pubs:
             print("There are %d nodes in your cluster, but %d pub and %d sub is going to be run, so some "
@@ -109,12 +110,14 @@ class InitCluster(object):
                                    env=env,
                                    volume_mounts=volume,
                                    command=['bash'])]
-            create_pod(dict(perftest="sub%d" % i), containers, i)
+            create_pod(dict(perftest="sub%d" % i), containers, i, hostnetwork)
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--cds', action='store_true', help='Set DDS CDS environment variable')
+    parser.add_argument('--hostnetwork', action='store_true', help='Use hostnetwork')
+    args = parser.parse_args()
     ic = InitCluster(1, 8)
-    if len(sys.argv) > 1 and sys.argv[1] == 'cds':
-        ic.main(cds=True)
-    else:
-        ic.main(cds=False)
+    ic.main(args.cds, args.hostnetwork)
+
