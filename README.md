@@ -1,6 +1,6 @@
 # K8sDDS
 
-*Performance Evaluation of Container-based DDS Application in Hybrid-Arch Kubernetes Cluster with Different Container Network Interfaces.*
+This is the repository for paper: [A Comprehensive Performance Evaluation of Different Kubernetes CNI Plugins for Edge-based and Containerized Publish/Subscribe Applications](https://ieeexplore.ieee.org/abstract/document/9610274), accepted by 2021 IEEE International Conference on Cloud Engineering (IC2E).
 
 ## Environment
 - Ubuntu(Linux/AMD64) Machine: K8s Master Node
