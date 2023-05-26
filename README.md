@@ -2,6 +2,17 @@
 
 This is the repository for paper: [A Comprehensive Performance Evaluation of Different Kubernetes CNI Plugins for Edge-based and Containerized Publish/Subscribe Applications](https://ieeexplore.ieee.org/abstract/document/9610274), accepted by *2021 IEEE International Conference on Cloud Engineering (IC2E)*.
 
+cite the paper
+```latex
+@inproceedings{kang2021comprehensive,
+  title={A Comprehensive Performance Evaluation of Different Kubernetes CNI Plugins for Edge-based and Containerized Publish/Subscribe Applications},
+  author={Kang, Zhuangwei and An, Kyoungho and Gokhale, Aniruddha and Pazandak, Paul},
+  booktitle={2021 IEEE International Conference on Cloud Engineering (IC2E)},
+  pages={31--42},
+  year={2021},
+  organization={IEEE}
+}
+```
 ## Environment
 - Ubuntu(Linux/AMD64) Machine: K8s Master Node
 - 9 Raspberry Pis 3B (Linux/ARM32): K8s Worker Nodes
